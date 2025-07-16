@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>פקמן נא</title>
+    <link rel="icon" type="image/jpeg" href="משחק.jpg">
+    <link rel="shortcut icon" href="משחק.jpg">
+    <link rel="apple-touch-icon" href="משחק.jpg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>פקמן נא</h1>
+        <div class="score-container">
+            <div class="score">ניקוד: <span id="score">0</span></div>
+            <div class="lives">חיים: <span id="lives">3</span></div>
+            <button id="fullscreenBtn" onclick="toggleFullscreen()">מסך מלא</button>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div class="controls">
+            <h3>בקרה:</h3>
+            <p>חצים / WASD - תנועה</p>
+            <p>רווח - השהיה</p>
+        </div>
+        
+        <div class="game-over" id="gameOver" style="display: none;">
+            <h2>המשחק הסתיים!</h2>
+            <p>הניקוד הסופי: <span id="finalScore">0</span></p>
+            <button onclick="restartGame()">להלחיל מחדש</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
