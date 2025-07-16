@@ -35,6 +35,7 @@ class PacmanGame {
             { x: 22, y: 14, direction: 'right', color: '#ffb852' }
         ];
         
+        
         // וידוא שתמיד יהיו 4 מפלצות
         this.ensureFourGhosts();
         
