@@ -299,7 +299,7 @@ class PacmanGame {
                     }
                 }
                 
-                // אם עדיין לא זז, שנה כיוון אקראי
+                // אם עדיין לא זז,Change random direction
                 if (!moved) {
                     const directions = ['up', 'down', 'left', 'right'];
                     ghost.direction = directions[Math.floor(Math.random() * directions.length)];
@@ -564,3 +564,4 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
     }
 });
+<meta name="google-site-verification" content="PfT9dqQLvFPsMakWq-rOru6yvCkxMoxpqNqjMvojf6Y" />
