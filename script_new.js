@@ -68,35 +68,35 @@ class PacmanGame {
     }
     
     createMaze() {
-        // יצירת מבוך פשוט
+        // יצירת מבוך פשוט עם פחות נקודות
         this.maze = [];
         for (let row = 0; row < this.rows; row++) {
             this.maze[row] = [];
             for (let col = 0; col < this.cols; col++) {
-                if (row === 0 || row === this.rows - 1 || col === 0 || col === this.cols - 1) {
+                if (
+                    row === 0 || row === this.rows - 1 ||
+                    col === 0 || col === this.cols - 1 ||
+                    (row % 3 === 0 && col % 3 === 0) || // יותר קירות פנימיים
+                    (row % 5 === 2 && col % 6 === 4) || // עוד קירות
+                    (col % 5 === 2 && row % 6 === 4)
+                ) {
                     this.maze[row][col] = 1; // קיר
-                } else if (row % 4 === 0 && col % 4 === 0) {
-                    this.maze[row][col] = 1; // קיר פנימי
-                } else if ((row % 4 === 2 && col % 8 === 4) || (col % 4 === 2 && row % 8 === 4)) {
-                    this.maze[row][col] = 1; // קירות נוספים
                 } else {
                     this.maze[row][col] = 0; // מסדרון עם נקודה
                 }
             }
         }
-        
+
         // ניקוי אזור ההתחלה של פקמן
         this.maze[1][1] = 0;
         this.maze[1][2] = 0;
         this.maze[2][1] = 0;
-        
-        // ניקוי אזור הרוחות - וידוא שהן במקומות פנויים
+
+        // ניקוי אזור הרוחות
         for (let i = 0; i < this.ghosts.length; i++) {
             const ghost = this.ghosts[i];
-            // וידוא שהמיקום חוקי
             if (ghost.x >= 0 && ghost.x < this.cols && ghost.y >= 0 && ghost.y < this.rows) {
                 this.maze[ghost.y][ghost.x] = 0;
-                // ניקוי אזור סביב המפלצת
                 for (let dy = -1; dy <= 1; dy++) {
                     for (let dx = -1; dx <= 1; dx++) {
                         const nx = ghost.x + dx;
