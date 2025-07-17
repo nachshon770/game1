@@ -68,7 +68,7 @@ class PacmanGame {
     }
     
     createMaze() {
-        // יצירת מבוך פשוט עם הרבה פחות נקודות
+        // יצירת מבוך עם הרבה יותר קירות
         this.maze = [];
         for (let row = 0; row < this.rows; row++) {
             this.maze[row] = [];
@@ -89,21 +89,21 @@ class PacmanGame {
             }
         }
 
-        // ניקוי אזור ההתחלה של פקמן - יותר רחב
-        for (let dy = 0; dy < 3; dy++) {
-            for (let dx = 0; dx < 3; dx++) {
+        // ניקוי אזור ההתחלה של פקמן
+        for (let dy = 0; dy < 2; dy++) {
+            for (let dx = 0; dx < 2; dx++) {
                 if (1 + dx < this.cols && 1 + dy < this.rows) {
                     this.maze[1 + dy][1 + dx] = 0;
                 }
             }
         }
 
-        // ניקוי אזור הרוחות - יותר רחב
+        // ניקוי אזור הרוחות
         for (let i = 0; i < this.ghosts.length; i++) {
             const ghost = this.ghosts[i];
             if (ghost.x >= 0 && ghost.x < this.cols && ghost.y >= 0 && ghost.y < this.rows) {
-                for (let dy = -2; dy <= 2; dy++) {
-                    for (let dx = -2; dx <= 2; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
                         const nx = ghost.x + dx;
                         const ny = ghost.y + dy;
                         if (nx > 0 && nx < this.cols - 1 && ny > 0 && ny < this.rows - 1) {
@@ -114,21 +114,114 @@ class PacmanGame {
             }
         }
 
-        // יצירת מסדרונות מחברים כדי שהמשחק יהיה עדיין ניתן לשחק
-        for (let row = 1; row < this.rows - 1; row += 4) {
+        // ספירת נקודות נוכחיות
+        let dotCount = 0;
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                if (this.maze[row][col] === 0) {
+                    dotCount++;
+                }
+            }
+        }
+
+        // התאמה ל-200 נקודות (196 נקודות רגילות + 4 נקודות גדולות)
+        const targetDots = 196; // 200 - 4 נקודות גדולות = 196 נקודות רגילות
+        
+        if (dotCount > targetDots) {
+            // יש יותר מדי נקודות - צריך להוסיף קירות
+            let dotsToRemove = dotCount - targetDots;
+            
+            for (let row = 1; row < this.rows - 1 && dotsToRemove > 0; row++) {
+                for (let col = 1; col < this.cols - 1 && dotsToRemove > 0; col++) {
+                    if (this.maze[row][col] === 0) {
+                        // וודא שזה לא באזור פקמן או רוחות
+                        let canRemove = true;
+                        
+                        // בדיקה שלא באזור פקמן
+                        if (row >= 1 && row <= 2 && col >= 1 && col <= 2) {
+                            canRemove = false;
+                        }
+                        
+                        // בדיקה שלא באזור רוחות
+                        for (let ghost of this.ghosts) {
+                            if (Math.abs(row - ghost.y) <= 1 && Math.abs(col - ghost.x) <= 1) {
+                                canRemove = false;
+                                break;
+                            }
+                        }
+                        
+                        // בדיקה שלא בפינות (עבור נקודות גדולות)
+                        if ((row === 2 && col === 2) || 
+                            (row === 2 && col === this.cols - 3) ||
+                            (row === this.rows - 3 && col === 2) ||
+                            (row === this.rows - 3 && col === this.cols - 3)) {
+                            canRemove = false;
+                        }
+                        
+                        if (canRemove && Math.random() < 0.5) { // הגברת סיכוי להסרה ל-50%
+                            this.maze[row][col] = 1; // הפיכה לקיר
+                            dotsToRemove--;
+                        }
+                    }
+                }
+            }
+        } else if (dotCount < targetDots) {
+            // יש מעט נקודות - צריך להוסיף נקודות
+            let dotsToAdd = targetDots - dotCount;
+            
+            for (let row = 1; row < this.rows - 1 && dotsToAdd > 0; row++) {
+                for (let col = 1; col < this.cols - 1 && dotsToAdd > 0; col++) {
+                    if (this.maze[row][col] === 1) {
+                        // בדיקה שזה לא קיר חיצוני או קיר מבנה חשוב
+                        let canAdd = true;
+                        
+                        // אל תסיר קירות של המבנה הבסיסי
+                        if ((row % 4 === 0 && col % 4 === 0) ||
+                            (row % 6 === 3 && col % 8 === 4) ||
+                            (col % 6 === 3 && row % 8 === 4)) {
+                            canAdd = false;
+                        }
+                        
+                        if (canAdd && Math.random() < 0.2) { // 20% סיכוי להוספה
+                            this.maze[row][col] = 0; // הפיכה לנקודה
+                            dotsToAdd--;
+                        }
+                    }
+                }
+            }
+        }
+
+        // יצירת מסדרונות מחברים מינימליים
+        for (let row = 3; row < this.rows - 3; row += 6) {
             for (let col = 1; col < this.cols - 1; col++) {
-                this.maze[row][col] = 0;
+                if (this.maze[row][col] === 1) {
+                    this.maze[row][col] = 0;
+                }
             }
         }
         
-        for (let col = 1; col < this.cols - 1; col += 4) {
+        for (let col = 3; col < this.cols - 3; col += 6) {
             for (let row = 1; row < this.rows - 1; row++) {
-                this.maze[row][col] = 0;
+                if (this.maze[row][col] === 1) {
+                    this.maze[row][col] = 0;
+                }
             }
         }
         
-        // הוספת נקודות גדולות בפינות
+        // הוספת נקודות גדולות בפינות (4 נקודות של 42 כל אחת)
         this.addPowerPellets();
+        
+        // ספירה סופית ודיווח
+        let finalDotCount = 0;
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                if (this.maze[row][col] === 0 || this.maze[row][col] === 2) {
+                    finalDotCount++;
+                }
+            }
+        }
+        
+        console.log(`סה"כ נקודות במשחק: ${finalDotCount}`);
     }
     
     addPowerPellets() {
@@ -347,6 +440,39 @@ class PacmanGame {
                 }
             }
         });
+        
+        // בדיקת ניצחון - המשחק נגמר כשמגיעים ל-442 נקודות
+        if (this.score >= 442) {
+            this.gameWin();
+        }
+    }
+    
+    gameWin() {
+        this.gameRunning = false;
+        this.finalScoreElement.textContent = this.score;
+        
+        // שינוי הודעת הסיום לניצחון
+        const gameOverTitle = document.querySelector('#gameOver h2');
+        if (gameOverTitle) {
+            gameOverTitle.textContent = 'ניצחת! כל הכבוד!';
+            gameOverTitle.style.color = '#00ff00'; // ירוק לניצחון
+        }
+        
+        this.gameOverElement.style.display = 'block';
+    }
+    
+    gameOver() {
+        this.gameRunning = false;
+        this.finalScoreElement.textContent = this.score;
+        
+        // וידוא שהודעת הסיום חוזרת למצב רגיל
+        const gameOverTitle = document.querySelector('#gameOver h2');
+        if (gameOverTitle) {
+            gameOverTitle.textContent = 'המשחק הסתיים!';
+            gameOverTitle.style.color = '#ff0000'; // אדום להפסד
+        }
+        
+        this.gameOverElement.style.display = 'block';
     }
     
     draw() {
@@ -473,6 +599,14 @@ class PacmanGame {
     gameOver() {
         this.gameRunning = false;
         this.finalScoreElement.textContent = this.score;
+        
+        // וידוא שהודעת הסיום חוזרת למצב רגיל
+        const gameOverTitle = document.querySelector('#gameOver h2');
+        if (gameOverTitle) {
+            gameOverTitle.textContent = 'המשחק הסתיים!';
+            gameOverTitle.style.color = '#ff0000'; // אדום להפסד
+        }
+        
         this.gameOverElement.style.display = 'block';
     }
     
