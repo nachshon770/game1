@@ -68,7 +68,7 @@ class PacmanGame {
     }
     
     createMaze() {
-        // יצירת מבוך פשוט עם פחות נקודות
+        // יצירת מבוך פשוט עם הרבה פחות נקודות
         this.maze = [];
         for (let row = 0; row < this.rows; row++) {
             this.maze[row] = [];
@@ -76,9 +76,11 @@ class PacmanGame {
                 if (
                     row === 0 || row === this.rows - 1 ||
                     col === 0 || col === this.cols - 1 ||
-                    (row % 3 === 0 && col % 3 === 0) || // יותר קירות פנימיים
-                    (row % 5 === 2 && col % 6 === 4) || // עוד קירות
-                    (col % 5 === 2 && row % 6 === 4)
+                    (row % 2 === 0 && col % 2 === 0) || // הרבה יותר קירות
+                    (row % 3 === 1 && col % 4 === 2) || // עוד קירות
+                    (col % 3 === 1 && row % 4 === 2) || // עוד קירות
+                    (row % 4 === 0 && col % 3 === 0) || // עוד יותר קירות
+                    (col % 4 === 0 && row % 3 === 0)    // עוד יותר קירות
                 ) {
                     this.maze[row][col] = 1; // קיר
                 } else {
@@ -87,27 +89,41 @@ class PacmanGame {
             }
         }
 
-        // ניקוי אזור ההתחלה של פקמן
-        this.maze[1][1] = 0;
-        this.maze[1][2] = 0;
-        this.maze[2][1] = 0;
+        // ניקוי אזור ההתחלה של פקמן - יותר רחב
+        for (let dy = 0; dy < 3; dy++) {
+            for (let dx = 0; dx < 3; dx++) {
+                if (1 + dx < this.cols && 1 + dy < this.rows) {
+                    this.maze[1 + dy][1 + dx] = 0;
+                }
+            }
+        }
 
-        // ניקוי אזור הרוחות
+        // ניקוי אזור הרוחות - יותר רחב
         for (let i = 0; i < this.ghosts.length; i++) {
             const ghost = this.ghosts[i];
             if (ghost.x >= 0 && ghost.x < this.cols && ghost.y >= 0 && ghost.y < this.rows) {
-                this.maze[ghost.y][ghost.x] = 0;
-                for (let dy = -1; dy <= 1; dy++) {
-                    for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -2; dy <= 2; dy++) {
+                    for (let dx = -2; dx <= 2; dx++) {
                         const nx = ghost.x + dx;
                         const ny = ghost.y + dy;
                         if (nx > 0 && nx < this.cols - 1 && ny > 0 && ny < this.rows - 1) {
-                            if (this.maze[ny][nx] !== 1) {
-                                this.maze[ny][nx] = 0;
-                            }
+                            this.maze[ny][nx] = 0;
                         }
                     }
                 }
+            }
+        }
+
+        // יצירת מסדרונות מחברים כדי שהמשחק יהיה עדיין ניתן לשחק
+        for (let row = 1; row < this.rows - 1; row += 4) {
+            for (let col = 1; col < this.cols - 1; col++) {
+                this.maze[row][col] = 0;
+            }
+        }
+        
+        for (let col = 1; col < this.cols - 1; col += 4) {
+            for (let row = 1; row < this.rows - 1; row++) {
+                this.maze[row][col] = 0;
             }
         }
         
